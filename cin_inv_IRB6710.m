@@ -85,12 +85,12 @@ for i = 1:n_soluciones
     error_rot = norm(Taux(1:3,1:3) - T(1:3,1:3), 'fro');
 end
 
-% Devolución
+
 if mejor
     if size(qq, 2) == 0
         error('No hay soluciones dentro de límites articulares');
     end
-    % Encontrar la solución más cercana a q0
+    
     Qaux = qq - q0' * ones(1, size(qq,2));
     normas = zeros(1, size(qq,2));
     for i = 1:size(qq,2)
@@ -103,12 +103,10 @@ else
 end
 end
 
-%=========================================================================%
-% FUNCIONES AUXILIARES
-%=========================================================================%
+%% FUNCIONES AUXILIARES
 
 function iT = invHomog(T)
-% Inversa de matriz homogénea
+
     iT = eye(4);
     iT(1:3, 1:3) = T(1:3, 1:3)';
     iT(1:3, 4) = -iT(1:3, 1:3) * T(1:3, 4);
@@ -117,7 +115,7 @@ end
 %=========================================================================%
 
 function q1 = calcular_q1(p)
-% Cálculo de q1 (2 soluciones)
+
     q1(1) = atan2(p(2), p(1));
     if q1(1) > 0
         q1(2) = q1(1) - pi;
@@ -130,29 +128,29 @@ end
 
 function q2 = calcular_q2(R, q1, p)
 % Cálculo de q2 (2 soluciones para un q1 dado)
-    % Transformar p al sistema {S1}
+    
     T1 = R.links(1).A(q1).double;
     p = invHomog(T1) * [p; 1];
     p = p(1:3);
     
-    % Parámetros geométricos
+    
     a2 = R.links(2).a;
     a3 = R.links(3).a;
     d4 = R.links(4).d;
     L = sqrt(a3^2 + d4^2);
     
-    % Triángulo
+    
     r = sqrt(p(1)^2 + p(2)^2);
     beta = atan2(p(2), p(1));
     cos_alpha = (a2^2 + r^2 - L^2) / (2 * a2 * r);
     
-    % CRÍTICO: Verificar si la posición es alcanzable
+    % Verificar si la posición es alcanzable
     if abs(cos_alpha) > 1
         if abs(cos_alpha) > 1.01  % Tolerancia de 1%
             error('Posición FUERA DE ALCANCE. cos(alpha) = %.4f (debe estar en [-1,1])', cos_alpha);
         else
-            % warning silencioso - posición en el límite de alcance
-            cos_alpha = sign(cos_alpha);  % Saturar a ±1
+            %
+            cos_alpha = sign(cos_alpha);  
         end
     end
     
@@ -163,7 +161,6 @@ function q2 = calcular_q2(R, q1, p)
         error('Ángulo alpha resultó imaginario. Posición inalcanzable.');
     end
     
-    % Dos soluciones geométricas (sin offset)
     q2(1) = beta + alpha;
     q2(2) = beta - alpha;
 end
@@ -171,18 +168,16 @@ end
 %=========================================================================%
 
 function q3 = calcular_q3(R, q1, q2, p)
-% Cálculo de q3
+
     % Transformar p al sistema {S2}
     T1 = R.links(1).A(q1).double;
     T2 = T1 * R.links(2).A(q2).double;
     p = invHomog(T2) * [p; 1];
     p = p(1:3);
     
-    % Parámetros
     a3 = R.links(3).a;
     d4 = R.links(4).d;
     
-    % Ángulos
     gamma = atan2(d4, a3);
     theta = atan2(p(2), p(1));
     
@@ -190,16 +185,14 @@ function q3 = calcular_q3(R, q1, q2, p)
     if imag(theta) ~= 0
         error('Ángulo theta resultó imaginario en q3.');
     end
-    
-    % q3 geométrico
+
     q3 = theta - gamma;
 end
 
 %=========================================================================%
 
 function [q4, q5, q6] = calcular_qm(R, q1, q2, q3, T, q0)
-% Cálculo de q4, q5, q6 (muñeca esférica)
-    % Calcular T36
+
     T1 = R.links(1).A(q1).double;
     T2 = R.links(2).A(q2).double;
     T3 = R.links(3).A(q3).double;
@@ -208,7 +201,7 @@ function [q4, q5, q6] = calcular_qm(R, q1, q2, q3, T, q0)
     
     % Verificar caso degenerado
     if abs(T36(3,3) - 1) < 1e-6
-        % Caso degenerado: z3 y z5 alineados - usar q4 anterior silenciosamente
+        % Caso degenerado: z3 y z5 alineados - usar q4 anterior
         q4(1) = q0(4);
         q5(1) = 0;
         q6(1) = atan2(T36(2,1), T36(1,1)) - q4(1);
@@ -216,7 +209,6 @@ function [q4, q5, q6] = calcular_qm(R, q1, q2, q3, T, q0)
         q5(2) = 0;
         q6(2) = q6(1);
     else
-        % Caso normal: 2 soluciones de q4
         q4(1) = atan2(T36(2,3), T36(1,3));
         if q4(1) > 0
             q4(2) = q4(1) - pi;
@@ -228,18 +220,14 @@ function [q4, q5, q6] = calcular_qm(R, q1, q2, q3, T, q0)
         q6 = zeros(1,2);
         
         for i=1:2
-            % Calcular T46
             T4 = R.links(4).A(q4(i)).double;
             T46 = invHomog(T4) * T36;
             
-            % q5
             q5(i) = atan2(T46(2,3), T46(1,3)) - pi/2;
-            
-            % Calcular T56
+
             T5 = R.links(5).A(q5(i)).double;
             T56 = invHomog(T5) * T46;
             
-            % q6
             q6(i) = atan2(T56(2,1), T56(1,1));
         end
     end

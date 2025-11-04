@@ -175,7 +175,7 @@ Q_seg = jtraj(Q_total(end,:), q0, N_interpol);
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%%  SECUENCIA 8:
+%%  SECUENCIA 8:Paso por puerta
 
 fprintf('\n[8] Paso por puerta (q5=-90)...\n');
 
@@ -356,7 +356,7 @@ fprintf('Total de configuraciones: %d\n', size(Q_total,1));
 fprintf('========================================\n');
 
 %% GRÁFICOS
-fprintf('\n¿Mostrar gráficos de velocidad y aceleración?\n');
+fprintf('\n¿Mostrar gráficas ?\n');
 fprintf('1. Sí\n');
 fprintf('2. No\n');
 opcion_graficas = input('Opción: ');

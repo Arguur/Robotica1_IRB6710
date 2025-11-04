@@ -5,7 +5,7 @@ function graficar_trayectoria(Q_traj, R)
     %   R - Robot (SerialLink)
     
     [N, ~] = size(Q_traj);
-    Ts = 0.1;  % Periodo de muestreo
+    Ts = 0.1;  
     t = (0:N-1)' * Ts;
     
     fprintf('\n========================================\n');
@@ -202,3 +202,4 @@ function graficar_trayectoria(Q_traj, R)
     fprintf('========================================\n');
 
 end
+

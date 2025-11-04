@@ -91,7 +91,7 @@ if mejor
         error('No hay soluciones dentro de límites articulares');
     end
     
-    Qaux = qq - q0' * ones(1, size(qq,2));
+    Qaux = qq - repmat(q0(:), 1, size(qq,2));
     normas = zeros(1, size(qq,2));
     for i = 1:size(qq,2)
         normas(i) = norm(Qaux(:,i));

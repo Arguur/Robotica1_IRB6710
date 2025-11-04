@@ -8,9 +8,8 @@ Q_total = [];
 
 fprintf('\n=== INICIO DE TRAYECTORIA COMPLETA ===\n');
 
-%% ========================================================================
-%  SECUENCIA 1: APROXIMACIÓN INICIAL (JTRAJ)
-%  ========================================================================
+%% SECUENCIA 1: APROXIMACIÓN INICIAL (JTRAJ)
+
 fprintf('\n[1] Aproximación inicial...\n');
 
 puntos_aprox = [
@@ -40,9 +39,8 @@ for i = 1:size(puntos_aprox,1)
 end
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  SECUENCIA 2: SOLDADURA VERTICAL
-%  ========================================================================
+%% SECUENCIA 2: SOLDADURA VERTICAL
+
 fprintf('\n[2] Soldadura vertical...\n');
 
 puntos_sold1 = [
@@ -65,9 +63,8 @@ Q_seg = trayectoria_cartesiana(R, T_sold1, Q_total(end,:), N_interpol, true);
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  SECUENCIA 3: RETORNO
-%  ========================================================================
+%% SECUENCIA 3: RETORNO
+
 fprintf('\n[3] Retorno a punto intermedio...\n');
 
 punto_retorno1 = [2.5, -0.8, 1.3];
@@ -79,9 +76,8 @@ Q_seg = jtraj(Q_total(end,:), q_retorno1, N_interpol);
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  SECUENCIA 4: SOLDADURA DIAGONAL
-%  ========================================================================
+%% SECUENCIA 4: SOLDADURA DIAGONAL
+
 fprintf('\n[4] Soldadura diagonal...\n');
 
 puntos_sold2 = [
@@ -108,9 +104,8 @@ Q_seg = trayectoria_cartesiana(R, T_sold2, Q_total(end,:), N_interpol, true);
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  SECUENCIA 5: RETORNO
-%  ========================================================================
+%% SECUENCIA 5: RETORNO
+
 fprintf('\n[5] Retorno a punto intermedio...\n');
 
 punto_retorno2 = [2.5, -0.8, 1.3];
@@ -122,9 +117,8 @@ Q_seg = jtraj(Q_total(end,:), q_retorno2, N_interpol);
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  SECUENCIA 6: SOLDADURA HORIZONTAL
-%  ========================================================================
+%% SECUENCIA 6: SOLDADURA HORIZONTAL
+
 fprintf('\n[6] Soldadura horizontal...\n');
 
 puntos_sold3 = [
@@ -147,9 +141,8 @@ Q_seg = trayectoria_cartesiana(R, T_sold3, Q_total(end,:), N_interpol, true);
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  SECUENCIA 7: RETORNO A HOME
-%  ========================================================================
+%% SECUENCIA 7: RETORNO A HOME
+
 fprintf('\n[7] Retorno a home...\n');
 
 puntos_retorno_home = [
@@ -182,9 +175,8 @@ Q_seg = jtraj(Q_total(end,:), q0, N_interpol);
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  SECUENCIA 8: PASO POR PUERTA CON Q5=-90
-%  ========================================================================
+%%  SECUENCIA 8:
+
 fprintf('\n[8] Paso por puerta (q5=-90)...\n');
 
 puntos_puerta = [
@@ -212,9 +204,8 @@ Q_seg = jtraj(Q_puerta(1,:), Q_puerta(2,:), N_interpol);
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  SECUENCIA 9: POSICIONAMIENTO INTERIOR
-%  ========================================================================
+%% SECUENCIA 9: POSICIONAMIENTO INTERIOR
+
 fprintf('\n[9] Posicionamiento interior...\n');
 
 punto_prep1 = [2.38, 0.5, 1.1];
@@ -226,9 +217,8 @@ Q_seg = jtraj(Q_total(end,:), q_prep1, N_interpol);
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  SECUENCIA 10: SOLDADURA INTERIOR LADO 1
-%  ========================================================================
+%% SECUENCIA 10: SOLDADURA INTERIOR LADO 1
+
 fprintf('\n[10] Soldadura interior lado 1...\n');
 
 puntos_sold4 = [
@@ -251,9 +241,8 @@ Q_seg = trayectoria_cartesiana(R, T_sold4, Q_total(end,:), N_interpol, true);
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  SECUENCIA 11: RETORNO
-%  ========================================================================
+%% SECUENCIA 11: RETORNO
+
 fprintf('\n[11] Retorno a preparación...\n');
 
 q_retorno_prep = cin_inv_IRB6710(R, T_prep1, Q_total(end,:), true);
@@ -261,9 +250,8 @@ Q_seg = jtraj(Q_total(end,:), q_retorno_prep, N_interpol);
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  SECUENCIA 12: SOLDADURA INTERIOR LADO 2
-%  ========================================================================
+%% SECUENCIA 12: SOLDADURA INTERIOR LADO 2
+
 fprintf('\n[12] Soldadura interior lado 2...\n');
 
 puntos_sold5 = [
@@ -286,9 +274,8 @@ Q_seg = trayectoria_cartesiana(R, T_sold5, Q_total(end,:), N_interpol, true);
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  SECUENCIA 13: SALIDA POR PUERTA
-%  ========================================================================
+%% SECUENCIA 13: SALIDA POR PUERTA
+
 fprintf('\n[13] Salida por puerta...\n');
 
 puntos_salida = [
@@ -323,9 +310,8 @@ Q_seg = jtraj(Q_total(end,:), q0, N_interpol);
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  SECUENCIA 14: SOLDADURA FINAL TECHO
-%  ========================================================================
+%% SECUENCIA 14: SOLDADURA FINAL TECHO
+
 fprintf('\n[14] Soldadura final techo...\n');
 
 puntos_sold_final = [
@@ -355,9 +341,8 @@ Q_seg = trayectoria_cartesiana(R, T_sold_final, Q_total(end,:), N_interpol, true
 Q_total = [Q_total; Q_seg];
 fprintf('  Configuraciones: %d\n', size(Q_total,1));
 
-%% ========================================================================
-%  RETORNO FINAL A HOME
-%  ========================================================================
+%%  RETORNO FINAL A HOME
+
 fprintf('\n[15] Retorno final a home...\n');
 
 Q_seg = jtraj(Q_total(end,:), q0, N_interpol);
@@ -377,7 +362,7 @@ fprintf('2. No\n');
 opcion_graficas = input('Opción: ');
 
 if opcion_graficas == 1
-    fprintf('\n📊 Generando gráficos...\n');
+    fprintf('\n Generando gráficos...\n');
     graficar_trayectoria(Q_total, R);
 end
 
@@ -388,13 +373,11 @@ fprintf('2. No\n');
 opcion = input('Opción: ');
 
 if opcion == 1
-    fprintf('\n📤 Enviando trayectoria completa...\n');
+    fprintf('\n Enviando trayectoria completa...\n');
     enviar_trayectoria_unity(Q_total, 20, 55001);
 end
 
-%% ========================================================================
-%  FUNCIONES AUXILIARES
-%  ========================================================================
+%% FUNCIONES AUXILIARES
 
 function T_array = generar_transformaciones(puntos, R_tool)
     n_puntos = size(puntos, 2);

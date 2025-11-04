@@ -35,7 +35,6 @@ function graficar_trayectoria(Q_traj, R)
     figure(1); clf;
     set(gcf, 'Position', [50 50 800 700], 'Name', 'Trayectoria Cartesiana 3D');
     
-    % Calcular posiciones cartesianas
     p = zeros(N, 3);
     for k = 1:N
         T = R.fkine(Q_traj(k,:));
@@ -45,7 +44,6 @@ function graficar_trayectoria(Q_traj, R)
         p(k,:) = T(1:3, 4)';
     end
     
-    % Graficar trayectoria 3D
     plot3(p(:,1), p(:,2), p(:,3), 'b-', 'LineWidth', 2);
     hold on;
     plot3(p(1,1), p(1,2), p(1,3), 'go', 'MarkerSize', 12, 'MarkerFaceColor', 'g');
@@ -84,7 +82,7 @@ function graficar_trayectoria(Q_traj, R)
         set(fig, 'Position', [150 + (i-1)*50, 150 + (i-1)*30, 1000, 800], ...
                  'Name', sprintf('Articulación %s', nombres_q{i}));
         
-        % SUBPLOT 1: POSICIÓN
+        % POS
         subplot(3,1,1);
         plot(t, Q_traj(:,i), 'b-', 'LineWidth', 1.5);
         hold on;
@@ -96,7 +94,7 @@ function graficar_trayectoria(Q_traj, R)
         title(sprintf('Articulación %s - Posición', nombres_q{i}));
         legend('Posición', 'Límite mínimo', 'Límite máximo', 'Location', 'best');
         
-        % SUBPLOT 2: VELOCIDAD
+        % VEL
         subplot(3,1,2);
         plot(t, qd(:,i), 'g-', 'LineWidth', 1.5);
         grid on;
@@ -104,7 +102,7 @@ function graficar_trayectoria(Q_traj, R)
         title(sprintf('Articulación %s - Velocidad', nombres_q{i}));
         legend('Velocidad', 'Location', 'best');
         
-        % SUBPLOT 3: ACELERACIÓN
+        % ACEL
         subplot(3,1,3);
         plot(t, qdd(:,i), 'r-', 'LineWidth', 1.5);
         grid on;
@@ -117,7 +115,7 @@ function graficar_trayectoria(Q_traj, R)
     %% FIGURA 9: VARIABLES CARTESIANAS (POSICIÓN, VELOCIDAD, ACELERACIÓN)
     fprintf('[9] Generando variables cartesianas (x, v, a)...\n');
     
-    % Calcular velocidades y aceleraciones cartesianas
+    
     pd = zeros(N, 3);
     pdd = zeros(N, 3);
     for c = 1:3
@@ -128,7 +126,7 @@ function graficar_trayectoria(Q_traj, R)
     figure(9); clf;
     set(gcf, 'Position', [200 200 1200 800], 'Name', 'Variables Cartesianas');
     
-    % POSICIÓN CARTESIANA
+    % CPOS
     subplot(3,1,1);
     plot(t, p(:,1), 'r-', 'LineWidth', 1.5); hold on;
     plot(t, p(:,2), 'g-', 'LineWidth', 1.5);
@@ -138,7 +136,7 @@ function graficar_trayectoria(Q_traj, R)
     title('Posición Cartesiana del Efector Final');
     legend('X', 'Y', 'Z', 'Location', 'best');
     
-    % VELOCIDAD CARTESIANA
+    % CVEL
     subplot(3,1,2);
     plot(t, pd(:,1), 'r-', 'LineWidth', 1.5); hold on;
     plot(t, pd(:,2), 'g-', 'LineWidth', 1.5);
@@ -148,7 +146,7 @@ function graficar_trayectoria(Q_traj, R)
     title('Velocidad Cartesiana del Efector Final');
     legend('Vx', 'Vy', 'Vz', 'Location', 'best');
     
-    % ACELERACIÓN CARTESIANA
+    % CACEL
     subplot(3,1,3);
     plot(t, pdd(:,1), 'r-', 'LineWidth', 1.5); hold on;
     plot(t, pdd(:,2), 'g-', 'LineWidth', 1.5);
@@ -202,4 +200,3 @@ function graficar_trayectoria(Q_traj, R)
     fprintf('========================================\n');
 
 end
-

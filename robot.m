@@ -31,10 +31,10 @@ R.qlim = [
 R.offset = [0, -pi/2, 0, 0, 0, 0];
 
 % c.iv) base
-R.base = transl(0, 0, 0);
+R.base = transl(0, 0, 0.3);
 
 % c.v) tool
-R.tool = transl(-0.10, 0, 0.98);
+R.tool = transl(-0.11, 0, 0.98);
 
 
 %% d) Workspace para ploteo

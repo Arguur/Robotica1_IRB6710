@@ -3,10 +3,9 @@ run('robot.m');
 
 %% CONFIGURACIÓN
 q0 = [0, 0, 0, 0, 0, 0];
-N_interpol = 15;
-tiempo_por_segmento = 2;
-Ts = tiempo_por_segmento / N_interpol;
-velocidad_cartesiana = 0.6;
+N_interpol = 25;
+Ts = 0.08;
+velocidad_cartesiana = 2;
 Q_total = [];
 
 %% DEFINICIÓN DE TODAS LAS SECUENCIAS
@@ -14,7 +13,8 @@ Q_total = [];
 % nivel_suavizado (solo para mstraj): 1=pasa cerca, 5=pasa muy lejos
 
 secuencias = {
-    {[2 -0.5 2.1; 2.15 -0.5 1.8; 2.35 -0.3 1.15], [0 0 1; 0 -1 0; 1 0 0]', 'mstraj', 5};
+    {[2 -0.5 2.1; 2.15 -0.5 1.8; 2.35 -0.3 1.65 ], [0 0 1; 0 -1 0; 1 0 0]', 'mstraj', 2};
+
     
 };
 
@@ -97,63 +97,53 @@ function Q_seg = procesar_jtraj(puntos, R_orientacion, q_actual, q_seed_inicial,
     end
 end
 
-function Q_seg = procesar_ctraj(puntos, R_orientacion, q_actual, N_interpol, R_robot)
-    T_primer = [R_orientacion, puntos(1,:)'; 0 0 0 1];
-    q_primer = cin_inv_IRB6710(R_robot, T_primer, q_actual, true);
-    Q_seg = jtraj(q_actual, q_primer, N_interpol);
-    
-    T_array = generar_transformaciones(puntos', R_orientacion);
-    Q_ctraj = trayectoria_cartesiana(R_robot, T_array, q_primer, N_interpol, true);
-    Q_seg = [Q_seg; Q_ctraj];
-end
-
 function Q_seg = procesar_mstraj(puntos, R_orientacion, q_actual, Ts, velocidad_max, nivel_suavizado, R_robot)
   
-    T_primer = [R_orientacion, puntos(1,:)'; 0 0 0 1];
-    q_primer = cin_inv_IRB6710(R_robot, T_primer, q_actual, true);
-    Q_seg = jtraj(q_actual, q_primer, 10);
-    
+
     if size(puntos, 1) == 1
+
+        T = [R_orientacion, puntos(1,:)'; 0 0 0 1];
+        q = cin_inv_IRB6710(R_robot, T, q_actual, true);
+        Q_seg = jtraj(q_actual, q, 15);
         return;
     end
     
-    % Mapear nivel_suavizado
-    tacc_map = [0.1, 0.3, 0.5, 0.7, 3.0];
+    tacc_map = [0.1, 0.2, 0.3, 0.4, 0.5];
     if nivel_suavizado < 1 || nivel_suavizado > 5
         nivel_suavizado = 3;  
     end
     tacc = tacc_map(nivel_suavizado);
     
-    fprintf('   → mstraj: nivel %d, tacc=%.2fs (radio de curva %s)\n', ...
-            nivel_suavizado, tacc, ...
-            ['pequeño', 'medio-bajo', 'medio', 'medio-alto', 'grande']);
-    
-    % Generar trayectoria suave con mstraj
+
     vel = [velocidad_max velocidad_max velocidad_max];
-    Q_cart = mstraj(puntos, vel, [], [], Ts, tacc);
     
-    % Cinemática inversa
+    T_actual = R_robot.fkine(q_actual);
+    if isa(T_actual, 'SE3')
+        T_actual = T_actual.double;
+    end
+    p_actual = T_actual(1:3, 4)';
+    
+    Q_cart = mstraj(puntos, vel, [], p_actual, Ts, tacc);
+
+    
     N = size(Q_cart, 1);
-    Q_mstraj = zeros(N, 6);
-    q_seed = q_primer;
+    Q_seg = zeros(N, 6);
+    q_seed = q_actual;
     
     for i = 1:N
         T = [R_orientacion, Q_cart(i,:)'; 0 0 0 1];
-        Q_mstraj(i,:) = cin_inv_IRB6710(R_robot, T, q_seed, true);
+        Q_seg(i,:) = cin_inv_IRB6710(R_robot, T, q_seed, true);
         
-        % Corregir saltos
         if i > 1
             for j = 1:6
-                diff = Q_mstraj(i,j) - Q_mstraj(i-1,j);
+                diff = Q_seg(i,j) - Q_seg(i-1,j);
                 if abs(diff) > pi
-                    Q_mstraj(i,j) = Q_mstraj(i,j) - round(diff/(2*pi)) * 2*pi;
+                    Q_seg(i,j) = Q_seg(i,j) - round(diff/(2*pi)) * 2*pi;
                 end
             end
         end
-        q_seed = Q_mstraj(i,:);
+        q_seed = Q_seg(i,:);
     end
-    
-    Q_seg = [Q_seg; Q_mstraj];
 end
 
 function T_array = generar_transformaciones(puntos, R_tool)

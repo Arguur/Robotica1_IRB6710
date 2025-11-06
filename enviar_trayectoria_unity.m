@@ -1,6 +1,4 @@
 function enviar_trayectoria_unity(Q_traj, fps, puerto)
-% Envía trayectoria a Unity con confirmaciones (ACK)
-
 if nargin < 2, fps = 30; end
 if nargin < 3, puerto = 55001; end
 
@@ -72,3 +70,4 @@ clear tcpServer;
 fprintf('🔌 Conexión cerrada.\n');
 
 end
+

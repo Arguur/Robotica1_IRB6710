@@ -20,8 +20,18 @@ end
 
 % Generar trayectoria cartesiana con mstraj
 tacc = 0.2;  % Tiempo de aceleración
-Q_cart = mstraj(waypoints, [velocidad_max velocidad_max velocidad_max], ...
-                [], [], Ts, tacc);
+
+% CORRECCIÓN: pasar primer punto como q0 y waypoints desde el 2do
+% Esto evita detenerse en el primer punto (modo continuo)
+if n_puntos > 1
+    Q_cart = mstraj(waypoints(2:end,:), ...
+                    [velocidad_max velocidad_max velocidad_max], ...
+                    [], ...              % tseg vacío = calcula automático
+                    waypoints(1,:), ...  % primer punto como inicial
+                    Ts, tacc);
+else
+    Q_cart = waypoints;  % un solo punto
+end
 
 % Cinemática inversa para cada punto
 N = size(Q_cart, 1);

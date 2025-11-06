@@ -3,22 +3,19 @@ run('robot.m');
 
 %% CONFIGURACIÓN
 q0 = [0, 0, 0, 0, 0, 0];
-N_interpol = 25;
-Ts = 0.08;
-velocidad_cartesiana = 2;
+N_interpol = 20;
+Ts = 0.06;
+velocidad_cartesiana = 2.5;
 Q_total = [];
 
-%% DEFINICIÓN DE TODAS LAS SECUENCIAS
-% Estructura: {puntos, orientación, tipo_trayectoria, [nivel_suavizado]}
-% nivel_suavizado (solo para mstraj): 1=pasa cerca, 5=pasa muy lejos
+%% DEFINICIÓN DE SECUENCIAS
+% Estructura: {puntos, orientación, tipo_trayectoria, [nivel_suavizado(1-5)]}
 
 secuencias = {
-    {[2 -0.5 2.1; 2.15 -0.5 1.8; 2.35 -0.3 1.65 ], [0 0 1; 0 -1 0; 1 0 0]', 'mstraj', 2};
-
-    
+    {[2 -0.5 2.1; 2.15 -0.5 1.8; 2.35 -0.3 1.1], [0 0 1; 0 -1 0; 1 0 0]', 'mstraj', 2};
 };
 
-%% EJECUTAR SECUENCIAS
+%% GENERAR TRAYECTORIA
 fprintf('\nGenerando trayectoria completa...\n');
 
 for s = 1:length(secuencias)
@@ -29,7 +26,7 @@ for s = 1:length(secuencias)
     if length(secuencias{s}) >= 4
         nivel_suavizado = secuencias{s}{4};
     else
-        nivel_suavizado = 3;  
+        nivel_suavizado = 3;
     end
     
     if isempty(Q_total)
@@ -41,32 +38,28 @@ for s = 1:length(secuencias)
     switch tipo
         case 'home'
             Q_seg = jtraj(q_actual, puntos, N_interpol);
-            Q_total = [Q_total; Q_seg];
             
         case 'puerta'
             q_seed = q0;
             q_seed(5) = -pi/2;
             Q_seg = procesar_jtraj(puntos, R_orientacion, q_actual, q_seed, N_interpol, R);
-            Q_total = [Q_total; Q_seg];
             
         case 'puerta_ret'
             T = [R_orientacion, puntos'; 0 0 0 1];
             q = cin_inv_IRB6710(R, T, q_actual, true);
             Q_seg = jtraj(q_actual, q, N_interpol);
-            Q_total = [Q_total; Q_seg];
             
         case 'jtraj'
             Q_seg = procesar_jtraj(puntos, R_orientacion, q_actual, [], N_interpol, R);
-            Q_total = [Q_total; Q_seg];
             
         case 'ctraj'
             Q_seg = procesar_ctraj(puntos, R_orientacion, q_actual, N_interpol, R);
-            Q_total = [Q_total; Q_seg];
             
         case 'mstraj'
             Q_seg = procesar_mstraj(puntos, R_orientacion, q_actual, Ts, velocidad_cartesiana, nivel_suavizado, R);
-            Q_total = [Q_total; Q_seg];
     end
+    
+    Q_total = [Q_total; Q_seg];
 end
 
 fprintf('Total configuraciones: %d\n', size(Q_total,1));
@@ -81,6 +74,7 @@ if input('\n¿Enviar a Unity? (1=Sí, 2=No): ') == 1
 end
 
 %% FUNCIONES AUXILIARES
+
 function Q_seg = procesar_jtraj(puntos, R_orientacion, q_actual, q_seed_inicial, N_interpol, R_robot)
     Q_seg = [];
     q_anterior = q_actual;
@@ -97,11 +91,18 @@ function Q_seg = procesar_jtraj(puntos, R_orientacion, q_actual, q_seed_inicial,
     end
 end
 
+function Q_seg = procesar_ctraj(puntos, R_orientacion, q_actual, N_interpol, R_robot)
+    T_primer = [R_orientacion, puntos(1,:)'; 0 0 0 1];
+    q_primer = cin_inv_IRB6710(R_robot, T_primer, q_actual, true);
+    Q_seg = jtraj(q_actual, q_primer, N_interpol);
+    
+    T_array = generar_transformaciones(puntos', R_orientacion);
+    Q_ctraj = trayectoria_cartesiana(R_robot, T_array, q_primer, N_interpol, true);
+    Q_seg = [Q_seg; Q_ctraj];
+end
+
 function Q_seg = procesar_mstraj(puntos, R_orientacion, q_actual, Ts, velocidad_max, nivel_suavizado, R_robot)
-  
-
     if size(puntos, 1) == 1
-
         T = [R_orientacion, puntos(1,:)'; 0 0 0 1];
         q = cin_inv_IRB6710(R_robot, T, q_actual, true);
         Q_seg = jtraj(q_actual, q, 15);
@@ -109,13 +110,7 @@ function Q_seg = procesar_mstraj(puntos, R_orientacion, q_actual, Ts, velocidad_
     end
     
     tacc_map = [0.1, 0.2, 0.3, 0.4, 0.5];
-    if nivel_suavizado < 1 || nivel_suavizado > 5
-        nivel_suavizado = 3;  
-    end
-    tacc = tacc_map(nivel_suavizado);
-    
-
-    vel = [velocidad_max velocidad_max velocidad_max];
+    tacc = tacc_map(max(1, min(nivel_suavizado, 5)));
     
     T_actual = R_robot.fkine(q_actual);
     if isa(T_actual, 'SE3')
@@ -123,8 +118,8 @@ function Q_seg = procesar_mstraj(puntos, R_orientacion, q_actual, Ts, velocidad_
     end
     p_actual = T_actual(1:3, 4)';
     
+    vel = [velocidad_max velocidad_max velocidad_max];
     Q_cart = mstraj(puntos, vel, [], p_actual, Ts, tacc);
-
     
     N = size(Q_cart, 1);
     Q_seg = zeros(N, 6);

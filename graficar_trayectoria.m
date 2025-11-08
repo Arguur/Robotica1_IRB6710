@@ -1,18 +1,12 @@
-function graficar_trayectoria(Q_traj, R)
-    % GRAFICAR_TRAYECTORIA Genera gráficas completas de la trayectoria
-    % Entradas:
-    %   Q_traj - Matriz de configuraciones articulares [N x 6]
-    %   R - Robot (SerialLink)
+function graficar_trayectoria(Q_traj, R, Ts)
     
     [N, ~] = size(Q_traj);
-    Ts = 0.1;  
     t = (0:N-1)' * Ts;
     
     fprintf('\n========================================\n');
     fprintf('GENERANDO GRÁFICAS DE TRAYECTORIA\n');
     fprintf('========================================\n');
     
-    %% CÁLCULO DE VELOCIDADES Y ACELERACIONES ARTICULARES
     qd = zeros(N, 6);
     qdd = zeros(N, 6);
     for c = 1:6

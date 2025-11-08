@@ -12,7 +12,21 @@ Q_total = [];
 % Estructura: {puntos, orientación, tipo_trayectoria, [nivel_suavizado(1-5)]}
 
 secuencias = {
-    {[2 -0.5 2.1; 2.15 -0.5 1.8; 2.35 -0.3 1.1], [0 0 1; 0 -1 0; 1 0 0]', 'mstraj', 2};
+    %puerta trasera
+    {[2 -0.5 2.1; 2.15 -0.5 1.8; 2.3531 -0.6324 1.1352], roty(pi/2)*rotz(pi), 'mstraj', 2};
+    {[2.3571 -0.4962 1.1031; 2.3574 -0.3441 1.1002], roty(pi/2)*rotz(pi), 'ctraj'};
+    {[2.3501 -0.1806 1.1559], roty(pi/2)*rotz(pi*15/12), 'ctraj'};
+    {[2.3221 -0.1392 1.2688; 2.3215 -0.1490 1.4530; 2.3283 -0.1761 1.6401], roty(pi/2)*rotz(pi*1.5), 'ctraj'};
+    
+    {[2.3770 -0.1973 1.8364; 2.4500 -0.2131 1.9953], roty(pi/2)*rotz(pi*1.5)*rotx(-pi/6), 'ctraj'};
+    {[2.5075 -0.3176 2.0853; 2.5021 -0.4534 2.0800; 2.5002 -0.5774 2.0692; 2.4949 -0.6949 2.0565;2.4741 -0.7996 2.0401], roty(pi*7.5/12)*rotz(pi*2), 'ctraj'};
+    {[2.3566 -1.15 1.7], roty(pi/2)*rotz(pi*9/12), 'mstraj', 2};
+    {[2.3566 -1.1634 1.6662; 2.3419 -1.0787 1.5698; 2.3481 -0.9836 1.4647], roty(pi/2)*rotz(pi*9/12), 'ctraj'};
+    %salir puerta trasera
+    {[2.3 -0.6 1.6], roty(pi/2)*rotz(pi), 'mstraj', 1};
+    {[1.8 -0.1 2], roty(pi/4)*rotz(pi), 'mstraj', 1};
+
+
 };
 
 %% GENERAR TRAYECTORIA
@@ -38,16 +52,6 @@ for s = 1:length(secuencias)
     switch tipo
         case 'home'
             Q_seg = jtraj(q_actual, puntos, N_interpol);
-            
-        case 'puerta'
-            q_seed = q0;
-            q_seed(5) = -pi/2;
-            Q_seg = procesar_jtraj(puntos, R_orientacion, q_actual, q_seed, N_interpol, R);
-            
-        case 'puerta_ret'
-            T = [R_orientacion, puntos'; 0 0 0 1];
-            q = cin_inv_IRB6710(R, T, q_actual, true);
-            Q_seg = jtraj(q_actual, q, N_interpol);
             
         case 'jtraj'
             Q_seg = procesar_jtraj(puntos, R_orientacion, q_actual, [], N_interpol, R);

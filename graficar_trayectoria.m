@@ -27,7 +27,8 @@ function graficar_trayectoria(Q_traj, R, Ts)
     %% FIGURA 1: TRAYECTORIA EN ESPACIO CARTESIANO (3D)
     fprintf('\n[1] Generando trayectoria en espacio cartesiano...\n');
     figure(1); clf;
-    set(gcf, 'Position', [50 50 800 700], 'Name', 'Trayectoria Cartesiana 3D');
+    set(gcf, 'Name', 'Trayectoria Cartesiana 3D');
+    set(gcf, 'WindowState', 'maximized');
     
     p = zeros(N, 3);
     for k = 1:N
@@ -57,7 +58,8 @@ function graficar_trayectoria(Q_traj, R, Ts)
     %% FIGURA 2: QPLOT - TODAS LAS ARTICULACIONES
     fprintf('[2] Generando qplot (todas las articulaciones)...\n');
     figure(2); clf;
-    set(gcf, 'Position', [100 100 1200 400], 'Name', 'Posiciones Articulares - Todas');
+    set(gcf, 'Name', 'Posiciones Articulares - Todas');
+    set(gcf, 'WindowState', 'maximized');
     
     qplot(t, Q_traj);
     grid on;
@@ -73,8 +75,8 @@ function graficar_trayectoria(Q_traj, R, Ts)
         fprintf('[%d] Generando gráficas para %s...\n', i+2, nombres_q{i});
         
         fig = figure(i+2); clf;
-        set(fig, 'Position', [150 + (i-1)*50, 150 + (i-1)*30, 1000, 800], ...
-                 'Name', sprintf('Articulación %s', nombres_q{i}));
+        set(fig, 'Name', sprintf('Articulación %s', nombres_q{i}));
+        set(fig, 'WindowState', 'maximized');
         
         % POS
         subplot(3,1,1);
@@ -118,7 +120,8 @@ function graficar_trayectoria(Q_traj, R, Ts)
     end
     
     figure(9); clf;
-    set(gcf, 'Position', [200 200 1200 800], 'Name', 'Variables Cartesianas');
+    set(gcf, 'Name', 'Variables Cartesianas');
+    set(gcf, 'WindowState', 'maximized');
     
     % CPOS
     subplot(3,1,1);

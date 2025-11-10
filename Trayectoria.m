@@ -35,12 +35,12 @@ secuencias = {
     {[2.35 0.135 1.3], roty(pi/2)*rotz(pi*8/12), 'mstraj', 2};
     {[2.3458 0.0503 1.2728; 2.3433 -0.0076 1.4469; 2.3454 -0.0439 1.6143], roty(pi/2)*rotz(pi*8/12), 'ctraj'};
     {[2.3460 -0.0527 1.7397; 2.4055 -0.0957 1.9010; 2.4583 -0.1224 2.0002], roty(pi/2)*rotz(pi/2)*rotx(pi/6), 'ctraj'};
-    {[2.3480 0.4301 1.48], roty(pi/2)*rotz(pi), 'mstraj', 1};
+    {[2.3480 0.4301 1.48], roty(pi/2), 'mstraj'};
     {[2.3480 0.9301 1.6580; 2.3465 0.9512 1.5403; 2.3466 0.9640 1.4115; 2.3466 0.9662 1.2703], roty(pi/2)*rotz(-pi/2), 'ctraj'};
 
     %salir de la puerta delantera
     {[2.3466 0.8 1.2703], roty(pi/2)*rotz(pi), 'ctraj'};
-    {[2.1 0.4 1.8; 2.05 0 2.4], roty(pi/2)*rotz(pi), 'mstraj', 2};
+    {[2.1 0.4 1.8; 2.05 0 2.4], roty(pi/2)*rotz(pi), 'jtraj'};
     {q0, [], 'home'}
 
     %Soldar parabrisas

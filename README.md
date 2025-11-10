@@ -29,14 +29,15 @@ Este proyecto implementa:
 ## Estructura del Repositorio
 ```
 Robotica1_IRB6710/
-├── robot.m                          # Definición del robot (DH, límites, base, tool)
-├── cin_inv_IRB6710.m                # Cinemática inversa con desacople
-├── Trayectoria.m                    # Script principal de planificación
-├── trayectoria_articular.m          # Interpolación articular (jtraj)
-├── trayectoria_cartesiana.m         # Interpolación cartesiana (ctraj)
-├── trayectoria_mstraj.m             # Trayectorias con perfiles trapezoidales
-├── graficar_trayectoria.m           # Visualización de resultados
-├── enviar_trayectoria_unity.m       # Comunicación MATLAB-Unity (TCP)
+├── robot.m                               # Definición del robot (DH, límites, base, tool)
+├── cin_inv_IRB6710.m                     # Cinemática inversa con desacople
+├── Trayectoria.m                         # Script principal de planificación
+├── trayectoria_articular.m               # Interpolación articular (jtraj)
+├── trayectoria_cartesiana.m              # Interpolación cartesiana (ctraj)
+├── trayectoria_mstraj.m                  # Trayectorias con perfiles trapezoidales
+├── graficar_trayectoria.m                # Visualización de resultados
+├── enviar_trayectoria_unity.m            # Comunicación MATLAB-Unity (TCP)
+├── Proyecto Final - Robotica 1 - grupo 2 # Informe del proyecto
 └── README.md
 ```
 

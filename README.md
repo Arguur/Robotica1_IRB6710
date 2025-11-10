@@ -1,11 +1,15 @@
 # IRB 6710-210/2.65 - Análisis Cinemático y Planificación de Trayectorias
+
 <div align="center">
-https://img.shields.io/badge/Robot-ABB%20IRB%206710-red?style=for-the-badge
-https://img.shields.io/badge/MATLAB-R2020a+-orange?style=for-the-badge&logo=mathworks
-https://img.shields.io/badge/Unity-2021.3+-blue?style=for-the-badge&logo=unity
-https://img.shields.io/badge/License-MIT-green?style=for-the-badge    
+
+![Robot](https://img.shields.io/badge/Robot-ABB%20IRB%206710-red?style=for-the-badge)
+![MATLAB](https://img.shields.io/badge/MATLAB-R2020a+-orange?style=for-the-badge&logo=mathworks)
+![Unity](https://img.shields.io/badge/Unity-2021.3+-blue?style=for-the-badge&logo=unity)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+
 **Proyecto Final - Robótica I**  
 Universidad Nacional de Cuyo - Facultad de Ingeniería
+
 </div>
 ---
 

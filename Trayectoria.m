@@ -7,7 +7,6 @@ N_interpol = 25;
 Ts = 0.06;
 velocidad_cartesiana = 0.7;
 Q_total = [];
-%calcular home
 T_home = R.fkine(q0);
 if isa(T_home, 'SE3')
     T_home = T_home.double;
@@ -16,7 +15,6 @@ p_home = T_home(1:3, 4)';
 R_home = T_home(1:3, 1:3);
 
 %% DEFINICIÓN DE SECUENCIAS
-% Estructura: {puntos, orientación, tipo_trayectoria, [nivel_suavizado(1-5)]}
 
 secuencias = {
     %puerta trasera

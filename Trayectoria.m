@@ -5,7 +5,7 @@ run('robot.m');
 q0 = [0, 0, 0, 0, 0, 0];
 N_interpol = 25;
 Ts = 0.06;
-velocidad_cartesiana = 1;
+velocidad_cartesiana = 0.8;
 Q_total = [];
 %calcular home
 T_home = R.fkine(q0);
@@ -30,23 +30,21 @@ secuencias = {
     {[2.3566 -1.1634 1.6662; 2.3419 -1.0787 1.5698; 2.3481 -0.9836 1.4647], roty(pi/2)*rotz(pi*9/12), 'ctraj'};
 
     %salir puerta trasera y pasar a la delantera
-    {[2.3 -0.6 1.6], roty(pi/2)*rotz(pi), 'mstraj', 2};
-    {[1.8 -0.1 2], roty(pi/4)*rotz(pi), 'mstraj', 2};
+    {[2.3 -0.6 1.6], roty(pi/2)*rotz(pi), 'mstraj', 1};
+    {[1.8 -0.1 2], roty(pi/4)*rotz(pi), 'mstraj', 1};
     {[2.35 0.135 1.3], roty(pi/2)*rotz(pi*8/12), 'mstraj', 2};
     {[2.3458 0.0503 1.2728; 2.3433 -0.0076 1.4469; 2.3454 -0.0439 1.6143], roty(pi/2)*rotz(pi*8/12), 'ctraj'};
     {[2.3460 -0.0527 1.7397; 2.4055 -0.0957 1.9010; 2.4583 -0.1224 2.0002], roty(pi/2)*rotz(pi/2)*rotx(pi/6), 'ctraj'};
-    {[2.3480 0.4301 1.48], roty(pi/2), 'mstraj'};
+    {[2.3480 0.4301 1.48], roty(pi/2), 'mstraj', 1};
     {[2.3480 0.9301 1.6580; 2.3465 0.9512 1.5403; 2.3466 0.9640 1.4115; 2.3466 0.9662 1.2703], roty(pi/2)*rotz(-pi/2), 'ctraj'};
 
     %salir de la puerta delantera
     {[2.3466 0.8 1.2703], roty(pi/2)*rotz(pi), 'ctraj'};
-    {[2.1 0.4 1.8; 2.05 0 2.4], roty(pi/2)*rotz(pi), 'jtraj'};
-    {q0, [], 'home'}
+    {[2.1 0.4 2], roty(pi/2)*rotz(pi*3/4), 'jtraj'};
 
     %Soldar parabrisas
-    {p_home, roty(pi/2)*rotz(pi*3/4), 'ctraj'};
     {[2.5 0.56 2.16; 2.47 0.53 2.16], roty(pi/2)*rotz(pi*3/4), 'mstraj', 1};
-    {[2.4719 0.5313 2; 2.4431 0.6438 1.942; 2.4166 0.7483 1.886; 2.3882 0.8646 1.8205; 2.3561 1.0087 1.7415], roty(pi/2)*rotz(pi*3/4)*rotx(pi/12), 'ctraj'};
+    {[2.4719 0.5313 2; 2.4431 0.6438 1.942; 2.4166 0.7483 1.886; 2.3882 0.8646 1.8205; 2.3561 1.0087 1.7415; 2.3561 1.0087 1.8915], roty(pi/2)*rotz(pi*3/4)*rotx(pi/12), 'ctraj'};
     {q0, [], 'home'}
 
 
@@ -74,7 +72,7 @@ for s = 1:length(secuencias)
     
     switch tipo
         case 'home'
-        Q_seg = jtraj(q_actual, puntos, N_interpol);
+            Q_seg = jtraj(q_actual, puntos, N_interpol);
 
         case 'jtraj'
             Q_seg = procesar_jtraj(puntos, R_orientacion, q_actual, [], N_interpol, R);
@@ -141,7 +139,7 @@ function Q_seg = procesar_mstraj(puntos, R_orientacion, q_actual, Ts, velocidad_
         return;
     end
     
-    tacc_map = [0.1, 0.2, 0.3, 0.4, 0.5];
+    tacc_map = [0.05, 0.1, 0.3, 0.6, 0.7];
     tacc = tacc_map(max(1, min(nivel_suavizado, 5)));
     
     T_actual = R_robot.fkine(q_actual);

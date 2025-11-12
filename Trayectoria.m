@@ -4,7 +4,7 @@ run('robot.m');
 %% CONFIGURACIÓN
 q0 = [0, 0, 0, 0, 0, 0];
 N_interpol = 25;
-Ts = 0.06;
+Ts = 0.04;
 velocidad_cartesiana = 1;
 Q_total = [];
 T_home = R.fkine(q0);
@@ -36,10 +36,9 @@ secuencias = {
 
     %salir de la puerta delantera
     {[2.3466 0.8 1.2703], roty(pi/2)*rotz(pi), 'ctraj'};
-    {[2.1 0.4 2], roty(pi/2)*rotz(pi*3/4), 'jtraj'};
+    {[2.1 0.4 1.5; 2 0.4 1.75; 2.3 0.48 2.1; 2.5 0.56 2.3; 2.47 0.53 2.2], roty(pi/2)*rotz(pi*3/4), 'mstraj', 3};
 
     %Soldar parabrisas
-    {[2.5 0.56 2.16; 2.47 0.53 2.16], roty(pi/2)*rotz(pi*3/4), 'mstraj', 1};
     {[2.4719 0.5313 2; 2.4431 0.6438 1.942; 2.4166 0.7483 1.886; 2.3882 0.8646 1.8205; 2.3561 1.0087 1.7415; 2.3561 1.0087 1.8915], roty(pi/2)*rotz(pi*3/4)*rotx(pi/12), 'ctraj'};
     {q0, [], 'home'}
 };
@@ -83,7 +82,6 @@ for s = 1:length(secuencias)
             Q_seg = [Q_seg; Q_ctraj];
             
         case 'mstraj'
-            % Usar función externa modularizada
             T_array = generar_transformaciones(puntos', R_orientacion);
             Q_seg = trayectoria_mstraj(R, T_array, q_actual, Ts, velocidad_cartesiana, nivel_suavizado);
     end

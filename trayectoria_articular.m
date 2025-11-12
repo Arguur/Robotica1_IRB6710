@@ -1,43 +1,34 @@
-function Q_traj = trayectoria_articular(R, T_puntos, q0, N_interpol)
-% TRAYECTORIA_ARTICULAR Genera trayectoria por interpolación en espacio articular
-% Entradas: [R] robot, [T_puntos] matrices de transformación objetivo (4x4xn), [q0] conf inicial, [N_interpol] puntos de interpolación
-% Salida: [Q_traj] trayectoria completa en espacio articular
+function Q_traj = trayectoria_articular(R, T_puntos, q0, N_interpol, q_seed_inicial)
+% Entradas:robot, matrices de transformación objetivo, configuración
+% articular inicial, puntos de interpolación entre cada par de
+% configuraciones, semilla para la primera cinemática inversa
+% Salida: trayectoria completa en espacio articular
+
+if nargin < 5
+    q_seed_inicial = [];
+end
 
 n_puntos = size(T_puntos, 3);
 
-%% CINEMÁTICA INVERSA PARA CADA PUNTO
-q_puntos = zeros(n_puntos, 6);
-for i = 1:n_puntos
-    if i == 1
-        q_seed = q0;
-    else
-        q_seed = q_puntos(i-1, :);
-    end
-    q_puntos(i, :) = cin_inv_IRB6710(R, T_puntos(:,:,i), q_seed, true);
-end
-
-%% CORRECCIÓN DE SALTOS ANGULARES
-
-q_puntos = unwrap(q_puntos);
-
-% fuerzo continuidad en muñeca
-for i = 2:n_puntos
-    for j = 4:6
-        diff_angle = q_puntos(i,j) - q_puntos(i-1,j);
-        if abs(diff_angle) > pi
-            q_puntos(i,j) = q_puntos(i,j) - round(diff_angle/(2*pi)) * 2*pi;
-        end
-    end
-end
-
-%% INTERPOLACIÓN ARTICULAR (jtraj)
+%% GENERAR TRAYECTORIA CON JTRAJ
 Q_traj = [];
-for i = 1:n_puntos-1
-    q_interp = jtraj(q_puntos(i,:), q_puntos(i+1,:), N_interpol);
+q_anterior = q0;
+
+for i = 1:n_puntos
+    if i == 1 && ~isempty(q_seed_inicial)
+        q_seed = q_seed_inicial;
+    else
+        q_seed = q_anterior;
+    end
+    
+    q_objetivo = cin_inv_IRB6710(R, T_puntos(:,:,i), q_seed, true);
+    
+    q_interp = jtraj(q_anterior, q_objetivo, N_interpol);
+    
     Q_traj = [Q_traj; q_interp];
+    q_anterior = q_objetivo;
 end
 
-% Verificación final
 verificar_continuidad(Q_traj, 'Articular');
 
 end

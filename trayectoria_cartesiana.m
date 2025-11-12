@@ -14,7 +14,6 @@ for i = 1:n_puntos-1
     q_interp = zeros(N_interpol, 6);
     
     for j = 1:N_interpol
-        % determinar semilla para ci
         if i == 1 && j == 1
             q_seed = q0;
         elseif size(Q_traj, 1) > 0
@@ -23,7 +22,6 @@ for i = 1:n_puntos-1
             q_seed = q_interp(j-1, :);
         end
         
-        % actual
         if isa(TT_interp, 'SE3')
             T_actual = TT_interp(j).double;
         else
@@ -32,7 +30,6 @@ for i = 1:n_puntos-1
        
         q_interp(j, :) = cin_inv_IRB6710(R, T_actual, q_seed, mejor);
         
-        % Corregir discontinuidades inmediatas
         if j > 1
             q_interp(j,:) = corregir_salto(q_interp(j,:), q_interp(j-1,:));
         elseif i > 1 && j == 1 && size(Q_traj, 1) > 0
@@ -62,13 +59,10 @@ function q_corregido = corregir_salto(q_actual, q_ref)
         diff_angle = q_actual(k) - q_ref(k);
         
         if abs(diff_angle) > pi
-            % ajustar múltiplos de 2π
             q_corregido(k) = q_actual(k) - round(diff_angle/(2*pi)) * 2*pi;
             
-            % Verificar
             diff_corregido = q_corregido(k) - q_ref(k);
             if abs(diff_corregido) > pi
-                % si no, camino mas corto
                 q_corregido(k) = q_corregido(k) - sign(diff_corregido) * 2*pi;
             end
         end
@@ -82,7 +76,6 @@ function [Q_traj, total_corregidos] = corregir_trayectoria_completa(Q_traj)
         q_original = Q_traj(i,:);
         Q_traj(i,:) = corregir_salto(Q_traj(i,:), Q_traj(i-1,:));
         
-        % Contar correcciones
         if any(abs(q_original - Q_traj(i,:)) > 1e-6)
             total_corregidos = total_corregidos + 1;
         end

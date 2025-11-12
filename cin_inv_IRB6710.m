@@ -29,7 +29,6 @@ q312 = calcular_q3(R, q1(1), q21(2), p);
 q321 = calcular_q3(R, q1(2), q22(1), p);
 q322 = calcular_q3(R, q1(2), q22(2), p);
 
-% Acomodo de soluciones en qq
 qq(1,:) = [q1(1)  q1(1)  q1(1)  q1(1)  q1(2)  q1(2)  q1(2)  q1(2)];
 qq(2,:) = [q21(1) q21(1) q21(2) q21(2) q22(1) q22(1) q22(2) q22(2)];
 qq(3,:) = [q311   q311   q312   q312   q321   q321   q322   q322];
@@ -193,21 +192,16 @@ end
 %=========================================================================%
 
 function q_unwrapped = unwrap_angle(q, q_ref, q_min, q_max)
-% Ajusta el ángulo q para estar cerca de q_ref, respetando límites
-% Agrega o quita múltiplos de 2π según sea necesario
     
-    % Probar el ángulo original y con ±2π, ±4π, ±6π
     opciones = q + 2*pi*(-3:3);
     
-    % Filtrar solo las opciones dentro de límites
     validas = opciones(opciones >= q_min & opciones <= q_max);
     
     if isempty(validas)
-        q_unwrapped = q;  % Si ninguna es válida, mantener original
+        q_unwrapped = q;  
         return;
     end
     
-    % Elegir la más cercana a q_ref
     [~, idx] = min(abs(validas - q_ref));
     q_unwrapped = validas(idx);
 end
@@ -222,12 +216,9 @@ function [q4, q5, q6] = calcular_qm(R, q1, q2, q3, T, q0)
     
     T36 = invHomog(T3) * invHomog(T2) * invHomog(T1) * T;
     
-    % Asegurar que q0 sea vector columna
     q0 = q0(:);
     
-    % Verificar caso degenerado
     if abs(T36(3,3) - 1) < 1e-6
-        % Caso degenerado: z3 y z5 alineados - usar q4 anterior
         q4(1) = q0(4);
         q5(1) = 0;
         
@@ -238,7 +229,6 @@ function [q4, q5, q6] = calcular_qm(R, q1, q2, q3, T, q0)
         q5(2) = 0;
         q6(2) = q6(1);
     else
-        % Calcular q4 con unwrapping
         q4_temp = atan2(T36(2,3), T36(1,3));
         q4(1) = unwrap_angle(q4_temp, q0(4), R.qlim(4,1), R.qlim(4,2));
         
@@ -256,14 +246,12 @@ function [q4, q5, q6] = calcular_qm(R, q1, q2, q3, T, q0)
             T4 = R.links(4).A(q4(i)).double;
             T46 = invHomog(T4) * T36;
             
-            % Calcular q5 con unwrapping
             q5_temp = atan2(T46(2,3), T46(1,3)) - pi/2;
             q5(i) = unwrap_angle(q5_temp, q0(5), R.qlim(5,1), R.qlim(5,2));
 
             T5 = R.links(5).A(q5(i)).double;
             T56 = invHomog(T5) * T46;
             
-            % Calcular q6 con unwrapping
             q6_temp = atan2(T56(2,1), T56(1,1));
             q6(i) = unwrap_angle(q6_temp, q0(6), R.qlim(6,1), R.qlim(6,2));
         end

@@ -18,7 +18,7 @@ R_home = T_home(1:3, 1:3);
 
 secuencias = {
     %puerta trasera
-    {[2 -0.5 2.1; 2.15 -0.5 1.8; 2.3531 -0.6324 1.1352], roty(pi/2)*rotz(pi), 'mstraj', 2};
+    {[2 -0.5 2.1; 2.15 -0.5 1.8; 2.3531 -0.6324 1.1352], roty(pi/2)*rotz(pi), 'mstraj', 3};
     {[2.3571 -0.4962 1.1031; 2.3574 -0.3441 1.1002], roty(pi/2)*rotz(pi), 'ctraj'};
     {[2.3501 -0.1806 1.1559], roty(pi/2)*rotz(pi*15/12), 'ctraj'};
     {[2.3221 -0.1392 1.2688; 2.3215 -0.1490 1.4530; 2.3283 -0.1761 1.6401], roty(pi/2)*rotz(pi*1.5), 'ctraj'};
@@ -69,18 +69,27 @@ for s = 1:length(secuencias)
             Q_seg = jtraj(q_actual, puntos, N_interpol);
 
         case 'jtraj'
-            Q_seg = procesar_jtraj(puntos, R_orientacion, q_actual, [], N_interpol, R);
+            T_array = generar_transformaciones(puntos', R_orientacion);
+            Q_seg = trayectoria_articular(R, T_array, q_actual, N_interpol);
             
         case 'ctraj'
-            Q_seg = procesar_ctraj(puntos, R_orientacion, q_actual, N_interpol, R);
+            T_array = generar_transformaciones(puntos', R_orientacion);
+            
+            T_primer = T_array(:,:,1);
+            q_primer = cin_inv_IRB6710(R, T_primer, q_actual, true);
+            Q_seg = jtraj(q_actual, q_primer, N_interpol);
+            
+            Q_ctraj = trayectoria_cartesiana(R, T_array, q_primer, N_interpol, true);
+            Q_seg = [Q_seg; Q_ctraj];
             
         case 'mstraj'
-            Q_seg = procesar_mstraj(puntos, R_orientacion, q_actual, Ts, velocidad_cartesiana, nivel_suavizado, R);
+            % Usar función externa modularizada
+            T_array = generar_transformaciones(puntos', R_orientacion);
+            Q_seg = trayectoria_mstraj(R, T_array, q_actual, Ts, velocidad_cartesiana, nivel_suavizado);
     end
     
     Q_total = [Q_total; Q_seg];
 end
-
 fprintf('Total configuraciones: %d\n', size(Q_total,1));
 
 %% VISUALIZACIÓN Y ENVÍO
@@ -97,94 +106,7 @@ if input('\n¿Enviar a Unity? (1=Sí, 2=No): ') == 1
     enviar_trayectoria_unity(Q_total, 20, 55001);
 end
 
-%% FUNCIONES AUXILIARES
-
-function Q_seg = procesar_jtraj(puntos, R_orientacion, q_actual, q_seed_inicial, N_interpol, R_robot)
-    Q_seg = [];
-    q_anterior = q_actual;
-    
-    for i = 1:size(puntos,1)
-        T = [R_orientacion, puntos(i,:)'; 0 0 0 1];
-        if i == 1 && ~isempty(q_seed_inicial)
-            q = cin_inv_IRB6710(R_robot, T, q_seed_inicial, true);
-        else
-            q = cin_inv_IRB6710(R_robot, T, q_anterior, true);
-        end
-        Q_seg = [Q_seg; jtraj(q_anterior, q, N_interpol)];
-        q_anterior = q;
-    end
-end
-
-function Q_seg = procesar_ctraj(puntos, R_orientacion, q_actual, N_interpol, R_robot)
-    T_primer = [R_orientacion, puntos(1,:)'; 0 0 0 1];
-    q_primer = cin_inv_IRB6710(R_robot, T_primer, q_actual, true);
-    Q_seg = jtraj(q_actual, q_primer, N_interpol);
-    
-    T_array = generar_transformaciones(puntos', R_orientacion);
-    Q_ctraj = trayectoria_cartesiana(R_robot, T_array, q_primer, N_interpol, true);
-    Q_seg = [Q_seg; Q_ctraj];
-end
-
-function Q_seg = procesar_mstraj(puntos, R_orientacion, q_actual, Ts, velocidad_max, nivel_suavizado, R_robot)
-    T_actual = R_robot.fkine(q_actual);
-    if isa(T_actual, 'SE3')
-        T_actual = T_actual.double;
-    end
-    p_actual = T_actual(1:3, 4)';
-    R_actual = T_actual(1:3, 1:3);
-    
-    waypoints = [p_actual; puntos];
-    
-    tacc_map = [0.05, 0.1, 0.3, 0.6, 0.7];
-    tacc = tacc_map(max(1, min(nivel_suavizado, 5)));
-    vel = [velocidad_max velocidad_max velocidad_max];
-    
-    Q_cart = mstraj(waypoints, vel, [], p_actual, Ts, tacc);
-    N = size(Q_cart, 1);
-    
-    R_diff = R_actual' * R_orientacion;  
-    theta = acos((trace(R_diff) - 1) / 2);  
-    
-    umbral_angular = 1e-4;  
-    
-    if abs(theta) < umbral_angular
-        interpolacion_necesaria = false;
-    else
-        interpolacion_necesaria = true;
-        T0_ori = [R_actual, [0;0;0]; 0 0 0 1];
-        Tf_ori = [R_orientacion, [0;0;0]; 0 0 0 1];
-        T_ori = ctraj(T0_ori, Tf_ori, N);
-    end
-    
-    Q_seg = zeros(N, 6);
-    q_seed = q_actual;
-    
-    for i = 1:N
-        if interpolacion_necesaria
-            if isa(T_ori, 'SE3')
-                R_i = T_ori(i).R;
-            else
-                R_i = T_ori(1:3, 1:3, i);
-            end
-        else
-            R_i = R_orientacion;
-        end
-        
-        T = [R_i, Q_cart(i,:)'; 0 0 0 1];
-        Q_seg(i,:) = cin_inv_IRB6710(R_robot, T, q_seed, true);
-        
-        if i > 1
-            for j = 1:6
-                diff = Q_seg(i,j) - Q_seg(i-1,j);
-                if abs(diff) > pi
-                    Q_seg(i,j) = Q_seg(i,j) - round(diff/(2*pi)) * 2*pi;
-                end
-            end
-        end
-        q_seed = Q_seg(i,:);
-    end
-end
-
+%% FUNCIÓN AUXILIAR
 function T_array = generar_transformaciones(puntos, R_tool)
     n_puntos = size(puntos, 2);
     T_array = zeros(4, 4, n_puntos);

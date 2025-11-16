@@ -12,276 +12,236 @@ Universidad Nacional de Cuyo - Facultad de Ingeniería
 </div>
 ---
 
-## Descripción
+## Soldadura por Puntos en Línea de Ensamblaje Automotriz
+![unnamed](https://github.com/user-attachments/assets/a7bdd463-5123-4ad6-bbfe-29cdd4d6b1b5)
 
-Análisis cinemático completo del robot industrial ABB IRB 6710-210/2.65 aplicado a **soldadura por puntos en línea de ensamblaje automotriz**. 
+## Demo en Unity
+[![Video Demo](https://img.youtube.com/vi/tIxCD4fexeM/maxresdefault.jpg)](https://youtu.be/tIxCD4fexeM)
 
-Este proyecto implementa:
-- Modelado Denavit-Hartenberg completo
-- Cinemática directa e inversa
-- Análisis de velocidades (Jacobiano)
-- Detección de singularidades
-- Planificación de trayectorias optimizadas
-- Simulación 3D en Unity
+**[Ver simulación completa en YouTube](https://youtu.be/tIxCD4fexeM)**
+
+## 📋 Descripción del Proyecto
+
+Este proyecto implementa un análisis cinemático completo del robot industrial **ABB IRB 6710-210/2.65** aplicado a una línea de ensamblaje de carrocerías automotrices. El robot realiza soldadura por puntos de forma automatizada, trabajando en paralelo con otro robot en la celda de trabajo.
+
+### Características Principales
+
+- ✅ **Robot Industrial**: ABB IRB 6710-210/2.65 (6 GDL)
+- ✅ **Cinemática Directa e Inversa**: Implementación completa con método geométrico
+- ✅ **Análisis Jacobiano**: Cálculo de singularidades y relación de velocidades
+- ✅ **Planificación de Trayectorias**: Combinación de trayectorias articulares y cartesianas
+- ✅ **Simulación en Unity**: Visualización 3D de la celda de trabajo
+- ✅ **Comunicación TCP/IP**: Envío de trayectorias desde MATLAB a Unity
 
 ---
 
-## Estructura del Repositorio
+## 🎓 Autores - Grupo 2
+
+- **Juan Francisco Huertas** - 12620
+- **Renzo Scaglia** - 11761
+- **Gabriel Mamaní** - 13401
+- **Germán Ricco** - 13653
+
+---
+
+## Animación realizada por:
+
+- **Juan Francisco Huertas** - 12620
+  
+---
+
+## 🛠️ Tecnologías Utilizadas
+
+- **MATLAB R2023a+** con Robotics System Toolbox
+- **Peter Corke Robotics Toolbox** ([RTB](https://petercorke.com/toolboxes/robotics-toolbox/))
+- **Unity 2021.3+** para simulación 3D
+- **TCP/IP** para comunicación MATLAB-Unity
+
+---
+
+## 📁 Estructura del Repositorio
+
 ```
 Robotica1_IRB6710/
-├── robot.m                               # Definición del robot (DH, límites, base, tool)
-├── cin_inv_IRB6710.m                     # Cinemática inversa con desacople
-├── Trayectoria.m                         # Script principal de planificación
-├── trayectoria_articular.m               # Interpolación articular (jtraj)
-├── trayectoria_cartesiana.m              # Interpolación cartesiana (ctraj)
-├── trayectoria_mstraj.m                  # Trayectorias con perfiles trapezoidales
-├── graficar_trayectoria.m                # Visualización de resultados
-├── enviar_trayectoria_unity.m            # Comunicación MATLAB-Unity (TCP)
-├── Proyecto Final - Robotica 1 - grupo 2 # Informe del proyecto
-└── README.md
+│
+├── robot.m                      # Definición del robot (parámetros DH, límites)
+├── cin_inv_IRB6710.m            # Cinemática inversa con desacople cinemático
+│
+├── Trayectoria.m                # Script principal de generación de trayectorias
+├── trayectoria_articular.m     # Interpolación en espacio articular (jtraj)
+├── trayectoria_cartesiana.m    # Interpolación en espacio cartesiano (ctraj)
+├── trayectoria_mstraj.m        # Trayectorias suavizadas con mstraj
+│
+├── graficar_trayectoria.m      # Visualización de trayectorias y análisis
+├── enviar_trayectoria_unity.m  # Comunicación TCP/IP con Unity
+│
+└── Proyecto_Final_Robotica_1_grupo_2.pdf  # Informe completo
 ```
 
 ---
 
-## Requisitos Previos
+## 🚀 Uso
 
-### Software Necesario
+### 1. Configuración Inicial
 
-- **MATLAB** R2020a o superior
-- **Robotics Toolbox** de Peter Corke (versión 10.4+)
-- **Unity** 2021.3+ (opcional, para simulación 3D)
+Asegúrate de tener instalado:
+- MATLAB con Robotics System Toolbox
+- Peter Corke Robotics Toolbox en el path de MATLAB
 
-### Instalación del Robotics Toolbox
 ```matlab
-% Desde MATLAB Add-Ons:
-% Home → Add-Ons → Get Add-Ons → Buscar "Robotics Toolbox"
-
-% O manual desde: https://petercorke.com/toolboxes/robotics-toolbox/
-addpath(genpath('ruta/a/rvctools'));
+% Agregar Robotics Toolbox al path (ajustar ruta según tu instalación)
+addpath(genpath('rvctools'));
 ```
 
----
+### 2. Definición del Robot
 
-## Inicio Rápido
-
-### 1. Definir el Robot
 ```matlab
 run('robot.m');
-% Crea la variable 'R' (SerialLink) con todos los parámetros
 ```
 
-### 2. Cinemática Directa
-```matlab
-q = [0, -pi/4, pi/3, 0, pi/6, 0];
-T = R.fkine(q);
-pos = T.t';  % Posición [x, y, z]
+Este script crea el objeto `R` del robot con:
+- Parámetros de Denavit-Hartenberg
+- Límites articulares
+- Transformaciones de base y herramienta
 
-% Visualizar
-R.plot(q, 'workspace', [-3 3 -3 3 -0.5 3]);
-```
+### 3. Generación de Trayectorias
 
-### 3. Cinemática Inversa
-```matlab
-% Pose deseada
-T_deseada = transl(2, 0.5, 1.5) * roty(pi/2) * rotz(pi);
-
-% Configuración inicial
-q0 = [0, 0, 0, 0, 0, 0];
-
-% Calcular CI (mejor solución)
-q_solucion = cin_inv_IRB6710(R, T_deseada, q0, true);
-
-% Obtener todas las soluciones
-Q_todas = cin_inv_IRB6710(R, T_deseada, q0, false);
-```
-
-### 4. Ejecutar Trayectoria Completa
 ```matlab
 run('Trayectoria.m');
-
-% El script solicita interactivamente:
-% 1. ¿Graficar trayectoria en MATLAB?
-% 2. ¿Mostrar gráficas de análisis?
-% 3. ¿Enviar a Unity?
 ```
 
-### 5. Enviar a Unity
+El script principal:
+1. Define una secuencia de puntos de soldadura
+2. Genera trayectorias combinadas (articulares + cartesianas)
+3. Ofrece opciones para:
+   - Graficar en MATLAB
+   - Visualizar gráficas de posición/velocidad/aceleración
+   - Enviar a Unity para simulación 3D
+
+### 4. Cinemática Inversa
+
 ```matlab
-puerto = 55001;
-fps = 20;
-enviar_trayectoria_unity(Q_total, fps, puerto);
+% Ejemplo: Calcular configuración articular para una pose deseada
+T_deseada = transl(2.0, 0.5, 1.8) * roty(pi/2) * rotz(pi);
+q_actual = [0, 0, 0, 0, 0, 0];
 
-% En Unity: Presionar 'C' para conectar
+% Solución óptima (más cercana a q_actual)
+q_sol = cin_inv_IRB6710(R, T_deseada, q_actual, true);
+
+% Todas las soluciones posibles
+q_todas = cin_inv_IRB6710(R, T_deseada, q_actual, false);
 ```
 
----
+### 5. Simulación en Unity
 
-## Funciones Principales
+Para enviar la trayectoria a Unity:
 
-### cin_inv_IRB6710(R, T, q0, mejor)
-
-Resuelve la cinemática inversa con desacople cinemático.
-
-**Parámetros:**
-- `R` - Objeto SerialLink del robot
-- `T` - Matriz de transformación 4x4 o SE3
-- `q0` - Configuración inicial [1x6]
-- `mejor` - true para mejor solución, false para todas
-
-**Retorna:**
-- `Q` - Solución(es) [6xN]
-
-**Características:**
-- Desacople posición/orientación
-- Hasta 8 soluciones posibles
-- Filtrado por límites articulares
-- Manejo de singularidades
-
----
-
-### graficar_trayectoria(Q_traj, R, Ts)
-
-Genera 9 figuras con análisis completo:
-
-1. Trayectoria 3D en espacio cartesiano
-2. Posiciones articulares (qplot)
-3-8. Análisis por articulación (posición, velocidad, aceleración)
-9. Variables cartesianas (X, Y, Z)
-
-Incluye estadísticas:
-- Velocidades máximas articulares
-- Aceleraciones máximas articulares
-- Velocidades cartesianas máximas
-
----
-
-### enviar_trayectoria_unity(Q_traj, fps, puerto)
-
-Envía trayectoria a Unity mediante TCP/IP.
-
-**Protocolo:**
-1. Servidor TCP en MATLAB (puerto 55001)
-2. Unity conecta como cliente
-3. Envío: `TOTAL:N` → `q1,q2,...,q6` → `END`
-4. Confirmación ACK por cada punto
-
----
-
-## Tipos de Trayectorias
-
-### Trayectoria Articular (jtraj)
-
-Movimientos rápidos punto a punto.
 ```matlab
-q_inicio = [0, 0, 0, 0, 0, 0];
-q_final = [pi/4, -pi/6, pi/3, 0, pi/4, 0];
-Q_traj = jtraj(q_inicio, q_final, 50);
+% Generar trayectoria
+Q_traj = ...;  % Matriz Nx6 con configuraciones articulares
+
+% Enviar a Unity (fps=20, puerto=55001)
+enviar_trayectoria_unity(Q_traj, 20, 55001);
 ```
 
-**Ventajas:**
-- Más suave y eficiente
-- Sin singularidades internas
-- Menor tiempo de ciclo
+**Nota**: Unity debe estar ejecutándose y presionar `C` para conectar.
 
 ---
 
-### Trayectoria Cartesiana (ctraj)
+## 📊 Características Técnicas del Robot
 
-Para soldadura u operaciones en línea recta.
-```matlab
-T_inicio = transl(2, 0, 1) * roty(pi/2);
-T_final = transl(2, 0.5, 1) * roty(pi/2);
-TT = ctraj(T_inicio, T_final, 50);
-Q_traj = trayectoria_cartesiana(R, TT, q0, 50, true);
-```
+| Parámetro | Valor |
+|-----------|-------|
+| **Alcance Máximo** | 2.65 m |
+| **Capacidad de Carga** | 210 kg |
+| **Repetibilidad (ISO 9283)** | 0.04 mm |
+| **Grados de Libertad** | 6 |
+| **Tipo de Muñeca** | Esférica |
 
-**Ventajas:**
-- Trayectoria cartesiana precisa
-- Control exacto del efector final
+### Rangos Articulares
 
----
-
-### Trayectoria Trapezoidal (mstraj)
-
-Movimientos con aceleración/desaceleración controladas.
-```matlab
-waypoints = [
-    2.0, -0.5, 1.5;
-    2.3, -0.3, 1.2;
-    2.5, 0.0, 1.8
-];
-
-Q_cart = mstraj(waypoints, [1,1,1], [], p_actual, 0.06, 0.2);
-```
-
-**Ventajas:**
-- Transiciones suaves
-- Control de aceleraciones
-- Configurable
+| Articulación | Rango [°] | Velocidad Máx [°/s] |
+|--------------|-----------|---------------------|
+| J1 (Base) | ±170 | 110 |
+| J2 (Hombro) | -65 / +85 | 110 |
+| J3 (Codo) | -180 / +70 | 110 |
+| J4 (Muñeca 1) | ±300 | 200 |
+| J5 (Muñeca 2) | ±130 | 150 |
+| J6 (Muñeca 3) | ±360 | 210 |
 
 ---
 
-## Análisis de Singularidades
+## 🔬 Análisis Implementado
 
-### Singularidad de Muñeca
+### Cinemática Directa
+- Parámetros de Denavit-Hartenberg estándar
+- Validación mediante análisis del espacio de trabajo
 
-**Condición:** q5 = k·π (k = 0, 1, 2, ...)
-```matlab
-J = R.jacob0(q);
-Jw = J(4:6, 4:6);
-det_Jw = det(Jw);  % = -sin(q5)
+### Cinemática Inversa
+- **Desacople cinemático** (posición + orientación)
+- **Método geométrico** para los primeros 3 GDL
+- Hasta **8 soluciones** para una pose dada
+- Criterio de selección por mínima distancia articular
 
-if abs(det_Jw) < 1e-6
-    warning('Singularidad de muñeca');
-end
-```
+### Análisis de Velocidades
+- Cálculo del **Jacobiano geométrico** (6×6)
+- Detección de **singularidades**:
+  - **Singularidad de muñeca**: q₅ = kπ
+  - **Singularidad de hombro**: centro de muñeca sobre eje base
+  - **Singularidad de alcance**: brazo completamente extendido
 
-**Consecuencias:**
-- Ejes 4 y 6 colineales
-- Pérdida de 1 GDL en orientación
-- Velocidades infinitas requeridas
-
----
-
-### Singularidad de Hombro
-
-**Condición:** Muñeca sobre eje Z0 (proyección nula en XY)
-```matlab
-u = sqrt(xm^2 + ym^2);
-if u < 1e-3
-    warning('Singularidad de hombro');
-end
-```
-
-**Consecuencias:**
-- Centro de muñeca sobre eje de base
-- Pérdida de 1 GDL en posición
-- q1 no afecta posición cartesiana
+### Planificación de Trayectorias
+- **Trayectorias articulares** (`jtraj`): reposicionamiento rápido
+- **Trayectorias cartesianas** (`ctraj`): precisión en soldadura
+- **Trayectorias suavizadas** (`mstraj`): control de aceleración
 
 ---
 
-## Resultados
+## 📈 Gráficas Generadas
 
-### Espacio de Trabajo
+El script `graficar_trayectoria.m` genera 9 figuras:
 
-- **Alcance máximo:** 2.65 m
-- **Carga útil:** 210 kg
-- **Repetibilidad:** ±0.04 mm (ISO 9283)
-
+1. **Trayectoria 3D** en espacio cartesiano
+2. **Posiciones articulares** (todas las articulaciones)
+3-8. **Por articulación**: posición, velocidad, aceleración
+9. **Variables cartesianas**: posición, velocidad, aceleración del efector
 
 ---
 
-## Autores
+## Aplicación: Soldadura por Puntos
 
-**Grupo 2 - Robótica I (2025)**
+El proyecto simula una **celda de trabajo automotriz** donde:
 
-- Juan Francisco Huertas (13653)
-- Renzo Scaglia (11761)
-- Gabriel Mamaní (13401)
-- Germán Ricco (13653)
+- Soldadura de carrocerías en una línea de ensamblaje
+- Secuencia automatizada de puntos de soldadura:
+  - Puerta trasera
+  - Lateral del vehículo
+  - Puerta delantera
+  - Parabrisas
 
-**Universidad Nacional de Cuyo**  
-Facultad de Ingeniería
+**Ventajas de la automatización**:
+- ✅ Consistencia en la calidad
+- ✅ Mayor productividad
+- ✅ Repetibilidad < 0.04 mm
+- ✅ Reducción de tiempos de ciclo
+
+---
+
+## 📄 Informe Completo
+
+Para más detalles sobre el análisis matemático, desarrollo de ecuaciones y resultados, consulta el [**informe completo en PDF**]
+
+---
+
+## 📝 Licencia
+
+Este proyecto fue desarrollado con fines académicos para la asignatura **Robótica I** de la carrera de Ingeniería Mecatrónica en la Universidad Nacional de Cuyo.
+
+---
+
+## 🙏 Agradecimientos
+
+Agradecemos a la **Facultad de Ingeniería de la UNCuyo** y al equipo docente de Robótica I por el apoyo durante el desarrollo de este proyecto.
 
 ---
 

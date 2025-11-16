@@ -227,7 +227,7 @@ El proyecto simula una **celda de trabajo automotriz** donde:
 
 ## 📄 Informe Completo
 
-Para más detalles sobre el análisis matemático, desarrollo de ecuaciones y resultados, consulta el [**informe completo en PDF**]
+Para más detalles sobre el análisis matemático, desarrollo de ecuaciones y resultados, consulta el [**informe completo en PDF: Proyecto Final - Robotica 1 - grupo 2**]
 
 ---
 

@@ -10,7 +10,6 @@
 Universidad Nacional de Cuyo - Facultad de Ingeniería
 
 </div>
----
 
 ## Soldadura por Puntos en Línea de Ensamblaje Automotriz
 ![unnamed](https://github.com/user-attachments/assets/a7bdd463-5123-4ad6-bbfe-29cdd4d6b1b5)
